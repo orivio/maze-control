@@ -78,6 +78,11 @@ class Player:
         radius = CELL_SIZE // 3
         pygame.draw.circle(surface, COLOR_PLAYER, (center_x, center_y), radius)
 
+class Enemy:
+    def __init__(self):
+        self.x = random.randint(5, 25)
+        self.y = random.randint(5, 25)
+
 
 def get_neighbors(cell, grid):
     """Gathers all unvisited neighbors adjacent to the cell."""
