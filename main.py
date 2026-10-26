@@ -19,6 +19,8 @@ COLOR_PLAYER = (52, 152, 219)    # Bright blue
 COLOR_VISITED = (44, 62, 80)     # Dark accent for carved rooms during generation
 COLOR_CURRENT = (241, 196, 15)   # Gold marker for the generation head
 
+COLOR_ENEMY = (219, 152, 52)
+
 # Set up display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Procedural Maze: Watch Generation or Play with Arrows!")
@@ -56,6 +58,7 @@ class Player:
     def __init__(self):
         self.x = 0
         self.y = 0
+        self.dead = False
 
     def move(self, dx, dy, grid):
         """Moves the player safely by verifying if a wall is blockading them."""
@@ -82,6 +85,43 @@ class Enemy:
     def __init__(self):
         self.x = random.randint(5, 25)
         self.y = random.randint(5, 25)
+    def move(self, dx, dy, grid):
+        cell = grid[self.y][self.x]
+        if dx == 1 and not cell.walls[1]:
+            self.x += 1
+        elif dx == -1 and not cell.walls[3]:
+            self.x -= 1
+        elif dy == 1 and not cell.walls[2]:
+            self.y += 1
+        elif dy == -1 and not cell.walls[0]:
+            self.y -= 1
+    def track(self, player, grid):
+        if player.x - self.x > 0:
+            if player.y - self.y > 0:
+                self.move(1, 1, grid)
+            elif player.y - self.y < 0:
+                self.move(1, -1, grid)
+            elif player.y == self.y:
+                self.move(1, 0, grid)
+        elif player.x - self.x < 0:
+            if player.y - self.y > 0:
+                self.move(-1, 1, grid)
+            elif player.y - self.y < 0:
+                self.move(-1, -1, grid)
+            elif player.y == self.y:
+                self.move(-1, 0, grid)
+        elif player.x == self.x:
+            if player.y - self.y > 0:
+                self.move(0, 1, grid)
+            elif player.y - self.y < 0:
+                self.move(0, -1, grid)
+            elif player.y == self.y:
+                player.dead = True
+    def draw(self, surface):
+        center_x = (self.x * CELL_SIZE) + (CELL_SIZE // 2)
+        center_y = (self.y * CELL_SIZE) + (CELL_SIZE // 2)
+        radius = CELL_SIZE // 3
+        pygame.draw.circle(surface, COLOR_ENEMY, (center_x, center_y), radius)
 
 
 def get_neighbors(cell, grid):
@@ -131,6 +171,7 @@ def reset_generation_state():
 def main():
     grid, stack, current, generating = reset_generation_state()
     player = Player()
+    enemy = Enemy()
     running = True
 
     while running:
@@ -185,6 +226,8 @@ def main():
             pygame.draw.rect(screen, COLOR_GOAL, ((GRID_SIZE - 1) * CELL_SIZE + 2, (GRID_SIZE - 1) * CELL_SIZE + 2, CELL_SIZE - 2, CELL_SIZE - 2))
             # Draw the playable element overlay
             player.draw(screen)
+            enemy.track(player, grid)
+            enemy.draw(screen)
         else:
             # Draw visual tracking box over the current algorithm generation head
             pygame.draw.rect(screen, COLOR_CURRENT, (current.x * CELL_SIZE + 3, current.y * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6))
