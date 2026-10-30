@@ -30,7 +30,7 @@ class Cell:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        # Walls ordered: [Top, Right, Bottom, Left]
+        # Walls ordered: [Top, Right, Bottom, Left] or NESW
         self.walls = [True, True, True, True]
         self.visited = False
 
@@ -59,6 +59,7 @@ class Player:
         self.x = 0
         self.y = 0
         self.dead = False
+        self.past_time = 0
 
     def move(self, dx, dy, grid):
         """Moves the player safely by verifying if a wall is blockading them."""
@@ -96,27 +97,30 @@ class Enemy:
         elif dy == -1 and not cell.walls[0]:
             self.y -= 1
     def track(self, player, grid):
-        if player.x - self.x > 0:
-            if player.y - self.y > 0:
-                self.move(1, 1, grid)
-            elif player.y - self.y < 0:
-                self.move(1, -1, grid)
-            elif player.y == self.y:
-                self.move(1, 0, grid)
-        elif player.x - self.x < 0:
-            if player.y - self.y > 0:
-                self.move(-1, 1, grid)
-            elif player.y - self.y < 0:
-                self.move(-1, -1, grid)
-            elif player.y == self.y:
-                self.move(-1, 0, grid)
-        elif player.x == self.x:
-            if player.y - self.y > 0:
-                self.move(0, 1, grid)
-            elif player.y - self.y < 0:
-                self.move(0, -1, grid)
-            elif player.y == self.y:
-                player.dead = True
+        goal = (player.x, player.y)
+    def wander(self, grid):
+        cell = grid[self.y][self.x]
+        y_diff = random.randint(-1, 1)
+        match y_diff:
+            case -1:
+                if not cell.walls[2]:
+                    self.y -= 1
+            case 0:
+                pass
+            case 1:
+                if not cell.walls[0]:
+                    self.y += 1
+        x_diff = random.randint(-1, 1)
+        match x_diff:
+            case -1:
+                if not cell.walls[3]:
+                    self.x -= 1
+            case 0:
+                pass
+            case 1:
+                if not cell.walls[1]:
+                    self.x += 1
+
     def draw(self, surface):
         center_x = (self.x * CELL_SIZE) + (CELL_SIZE // 2)
         center_y = (self.y * CELL_SIZE) + (CELL_SIZE // 2)
@@ -226,8 +230,11 @@ def main():
             pygame.draw.rect(screen, COLOR_GOAL, ((GRID_SIZE - 1) * CELL_SIZE + 2, (GRID_SIZE - 1) * CELL_SIZE + 2, CELL_SIZE - 2, CELL_SIZE - 2))
             # Draw the playable element overlay
             player.draw(screen)
-            enemy.track(player, grid)
+            #enemy.track(player, grid)
             enemy.draw(screen)
+            if pygame.time.get_ticks() - player.past_time >= 500:
+                player.past_time = pygame.time.get_ticks()
+                enemy.wander(grid)
         else:
             # Draw visual tracking box over the current algorithm generation head
             pygame.draw.rect(screen, COLOR_CURRENT, (current.x * CELL_SIZE + 3, current.y * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6))
