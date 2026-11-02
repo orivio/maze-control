@@ -34,6 +34,22 @@ class Cell:
         # Walls ordered: [Top, Right, Bottom, Left] or NESW
         self.walls = [True, True, True, True]
         self.visited = False
+        self.type = ""
+        self.cost = 0
+        num = random.randint(0, 100)
+        if num <= 50:
+            self.type = "Floor"
+            self.cost = 1
+        elif 50 < num <= 75:
+            self.type = "Mud"
+            self.cost = 2
+        elif 75 < num <= 95:
+            self.type = "Cobweb"
+            self.cost = 4
+        elif 95 < num:
+            self.type = "Poison"
+            self.cost = 8
+
 
     def draw(self, surface, is_generating=False):
         """Draws the background cell area and its walls."""
