@@ -100,26 +100,31 @@ class Enemy:
         goal = (player.x, player.y)
     def wander(self, grid):
         cell = grid[self.y][self.x]
-        y_diff = random.randint(-1, 1)
-        match y_diff:
-            case -1:
-                if not cell.walls[2]:
-                    self.y -= 1
+        rand = random.randint(0, 1)
+        match rand:
             case 0:
-                pass
+                x_diff = random.randint(-1, 1)
+                match x_diff:
+                    case -1:
+                        if not cell.walls[3]:
+                            self.x -= 1
+                    case 0:
+                        pass
+                    case 1:
+                        if not cell.walls[1]:
+                            self.x += 1
             case 1:
-                if not cell.walls[0]:
-                    self.y += 1
-        x_diff = random.randint(-1, 1)
-        match x_diff:
-            case -1:
-                if not cell.walls[3]:
-                    self.x -= 1
-            case 0:
-                pass
-            case 1:
-                if not cell.walls[1]:
-                    self.x += 1
+                y_diff = random.randint(-1, 1)
+                match y_diff:
+                    case -1:
+                        if not cell.walls[0]:
+                            self.y -= 1
+                    case 0:
+                        pass
+                    case 1:
+                        if not cell.walls[2]:
+                            self.y += 1
+
 
     def draw(self, surface):
         center_x = (self.x * CELL_SIZE) + (CELL_SIZE // 2)
