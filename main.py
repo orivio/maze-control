@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 # Initialize Pygame
 pygame.init()
@@ -97,7 +98,14 @@ class Enemy:
         elif dy == -1 and not cell.walls[0]:
             self.y -= 1
     def track(self, player, grid):
+        cell = grid[self.y][self.x]
+        point = (self.x, self.y)
         goal = (player.x, player.y)
+        dist = math.dist(point, goal)
+        obs_radius = 20
+
+        if dist <= 20:
+            pass
     def wander(self, grid):
         cell = grid[self.y][self.x]
         rand = random.randint(0, 1)
